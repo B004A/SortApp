@@ -48,6 +48,7 @@ public class App extends Application {
     private SortTemplate sortType;
     private HBox barChart;
     private int[] valuesForAlgorithm;
+    private int[] valuesInProgress;
     private String numbersInputValue, algorithmChoice, speedChoice;
 
     @Override
@@ -75,6 +76,7 @@ public class App extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+        paramButton.fire();
     }
 
     static void setRoot(String fxml) throws IOException {
@@ -149,6 +151,7 @@ public class App extends Application {
                     fullBar.heightProperty()));
             bar.setStroke(Color.BLACK);
             bar.setStrokeWidth(1);
+            bar.setId(String.valueOf(num));
             barText = new Text(String.valueOf(num));
             fullBar.setSpacing(2);
             fullBar.setAlignment(Pos.BOTTOM_CENTER);
@@ -170,9 +173,9 @@ public class App extends Application {
         Scene settingsScene = new Scene(settingsGrid, scWidth * 0.2, scHeight * 0.2);
         Text explanationText = new Text("Parametres pour la visualisation d'un tri : ");
         Text chosenAlgorithmText = new Text("Algorithme de tri : ");
-        ComboBox<String> algorithmChoice = new ComboBox<>();
-        algorithmChoice.getItems().addAll("Merge sort", "Quick sort");
-        algorithmChoice.setValue("Merge sort");
+        ComboBox<String> algorithmChoiceList = new ComboBox<>();
+        algorithmChoiceList.getItems().addAll("Merge sort", "Quick sort");
+        algorithmChoiceList.setValue(algorithmChoice == null ? "Merge sort" : algorithmChoice);
         Text collectionToSortText = new Text("Collection d'entier a trier : ");
         TextField numbersToSort = new TextField();
         numbersToSort.setPromptText("ex.: 1,5,3,7,9...63");
@@ -200,24 +203,7 @@ public class App extends Application {
         settingsApplyButton.prefWidthProperty().bind(settingsWindowButtons.widthProperty().divide(5));
         // apply button setup
         settingsApplyButton.setOnAction(e -> {
-            String chosenAlgorithm = algorithmChoice.getValue();
-            assignAlgorithm(chosenAlgorithm);
-            if (!(numbersToSort.getText().equals(""))) {
-                System.out.println(numbersInputValue);
-                String[] extractedValues = numbersToSort.getText().split(",");
-                valuesForAlgorithm = new int[extractedValues.length];
-                for (int i = 0; i < extractedValues.length; i++) {
-                    valuesForAlgorithm[i] = Integer.parseInt(extractedValues[i].trim());
-                }
-                if (numbersInputValue == null) {
-                    numbersInputValue = numbersToSort.getText();
-                    setBarChart(barChart, valuesForAlgorithm);
-                }
-                if (!(numbersInputValue.equals(numbersToSort.getText()))) {
-                    numbersInputValue = numbersToSort.getText();
-                    setBarChart(barChart, valuesForAlgorithm);
-                }
-            }
+            settingsCheck(algorithmChoiceList, sortSpeed, numbersToSort);
         });
         settingsWindowButtons.getChildren().addAll(settingsOkButton, settingsCancelButton, settingsApplyButton);
         settingsWindowButtons.setAlignment(Pos.BOTTOM_RIGHT);
@@ -225,7 +211,7 @@ public class App extends Application {
         // Add elements to grid
         settingsGrid.add(explanationText, 0, 1);
         settingsGrid.add(chosenAlgorithmText, 0, 2);
-        settingsGrid.add(algorithmChoice, 1, 2);
+        settingsGrid.add(algorithmChoiceList, 1, 2);
         settingsGrid.add(collectionToSortText, 0, 3);
         settingsGrid.add(numbersToSort, 1, 3);
         settingsGrid.add(sortSpeedText, 0, 4);
@@ -251,8 +237,55 @@ public class App extends Application {
                 sortType = new MergeSort();
                 break;
             case "Quick sort":
-                sortType = new QuickSort();
+                sortType = new QuickSort(this);
                 break;
+        }
+    }
+
+    public void highlightItems(int[] itemsToHighlight) {
+        for (int i = 0; i < itemsToHighlight.length; i++) {
+            Rectangle neededBar = (Rectangle) barChart.lookup("#" + itemsToHighlight[i]);
+            System.out.println(neededBar);
+            if (neededBar != null) {
+                neededBar.setFill(Color.PURPLE);
+            }
+
+        }
+    }
+
+    private void settingsCheck(ComboBox<String> algorithmChoiceList, ComboBox<String> sortSpeed,
+            TextField numbersToSort) {
+        String selectedAlgorithm = algorithmChoiceList.getValue();
+        System.out.println(selectedAlgorithm);
+
+        if (algorithmChoice == null) {
+            algorithmChoice = algorithmChoiceList.getValue();
+            assignAlgorithm(algorithmChoice);
+        }
+        if (speedChoice == null) {
+            speedChoice = sortSpeed.getValue();
+        }
+        if (!(numbersToSort.getText().equals(""))) {
+            String[] extractedValues = numbersToSort.getText().split(",");
+            valuesForAlgorithm = new int[extractedValues.length];
+            for (int i = 0; i < extractedValues.length; i++) {
+                valuesForAlgorithm[i] = Integer.parseInt(extractedValues[i].trim());
+            }
+            if (numbersInputValue == null) {
+                numbersInputValue = numbersToSort.getText();
+                setBarChart(barChart, valuesForAlgorithm);
+            }
+        }
+        if (numbersInputValue != null && !(numbersInputValue.equals(numbersToSort.getText()))) {
+            numbersInputValue = numbersToSort.getText();
+            setBarChart(barChart, valuesForAlgorithm);
+        }
+        if (!(algorithmChoice.equals(selectedAlgorithm))) {
+            algorithmChoice = algorithmChoiceList.getValue();
+            assignAlgorithm(algorithmChoice);
+            if (numbersInputValue != null) {
+                setBarChart(barChart, valuesForAlgorithm);
+            }
         }
     }
 

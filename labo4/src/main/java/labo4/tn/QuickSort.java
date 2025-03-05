@@ -1,8 +1,17 @@
 package labo4.tn;
 
-public class QuickSort extends SortTemplate {
+import labo4.tn.App;
 
-    private void changerLesElements(int[] array, int indexI, int indexJ) {
+public class QuickSort extends SortTemplate {
+    private App sortApp;
+
+    public QuickSort(App sortApp) {
+        this.sortApp = sortApp;
+    }
+
+    private void swapElements(int[] array, int indexI, int indexJ) {
+        int[] indexArray = { indexI, indexJ };
+        sortApp.highlightItems(indexArray);
         int temp = array[indexJ];
         array[indexJ] = array[indexI];
         array[indexI] = temp;
@@ -25,10 +34,10 @@ public class QuickSort extends SortTemplate {
         for (int j = start; j <= fin; j++) {
             if (array[j] < pivot) {
                 indexPlusPetit++;
-                changerLesElements(array, indexPlusPetit, j);
+                swapElements(array, indexPlusPetit, j);
             }
         }
-        changerLesElements(array, indexPlusPetit + 1, fin);
+        swapElements(array, indexPlusPetit + 1, fin);
         return indexPlusPetit + 1;
 
     }
