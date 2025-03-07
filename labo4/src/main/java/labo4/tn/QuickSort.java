@@ -1,17 +1,15 @@
 package labo4.tn;
 
-import labo4.tn.App;
+import javafx.application.Platform;
 
-public class QuickSort extends SortTemplate {
-    private App sortApp;
+public class QuickSort extends SortTemplate implements Runnable {
 
     public QuickSort(App sortApp) {
         this.sortApp = sortApp;
     }
 
     private void swapElements(int[] array, int indexI, int indexJ) {
-        int[] indexArray = { indexI, indexJ };
-        sortApp.highlightItems(indexArray);
+        int[] swapArray = { array[indexI], array[indexJ] };
         int temp = array[indexJ];
         array[indexJ] = array[indexI];
         array[indexI] = temp;
@@ -30,15 +28,29 @@ public class QuickSort extends SortTemplate {
     @Override
     public int findSplitPoint(int[] array, int start, int fin) {
         int pivot = array[fin];
-        int indexPlusPetit = start - 1;
+        int[] elementsToSwap = new int[3];
+        int[] arrPivot = { array[fin] };
+        sleepThread(sleepTime, arrPivot);
+        int lowestIndex = start - 1;
         for (int j = start; j <= fin; j++) {
             if (array[j] < pivot) {
-                indexPlusPetit++;
-                swapElements(array, indexPlusPetit, j);
+                lowestIndex++;
+                elementsToSwap[0] = array[lowestIndex];
+                elementsToSwap[1] = array[j];
+                elementsToSwap[2] = array[fin];
+                sleepThread(sleepTime, elementsToSwap);
+                swapElements(array, lowestIndex, j);
+                sleepThread(sleepTime, elementsToSwap);
             }
         }
-        swapElements(array, indexPlusPetit + 1, fin);
-        return indexPlusPetit + 1;
+        elementsToSwap[0] = array[lowestIndex + 1];
+        elementsToSwap[1] = array[fin];
+        sleepThread(sleepTime, elementsToSwap);
+        swapElements(array, lowestIndex + 1, fin);
+        sleepThread(sleepTime, elementsToSwap);
+
+        return lowestIndex + 1;
 
     }
+
 }

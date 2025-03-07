@@ -3,34 +3,37 @@ package labo4.tn;
 import java.util.Arrays;
 
 public class MergeSort extends SortTemplate {
+    public MergeSort(App sortApp) {
+        this.sortApp = sortApp;
+    }
 
     private void merge(int[] array, int start, int mid, int fin) {
-        int nbElementsGauche = mid - start + 1;
-        int nbElementsDroite = fin - mid;
-        int[] partieGauche = new int[nbElementsGauche];
-        int[] partieDroite = new int[nbElementsDroite];
-        System.arraycopy(array, start, partieGauche, 0, nbElementsGauche);
-        System.arraycopy(array, mid + 1, partieDroite, 0, nbElementsDroite);
+        int nbLeftElements = mid - start + 1;
+        int nbRightElements = fin - mid;
+        int[] leftPart = new int[nbLeftElements];
+        int[] rightPart = new int[nbRightElements];
+        System.arraycopy(array, start, leftPart, 0, nbLeftElements);
+        System.arraycopy(array, mid + 1, rightPart, 0, nbRightElements);
         int i = 0;
         int j = 0;
         int k = start;
-        while (i < nbElementsGauche && j < nbElementsDroite) {
-            if (partieGauche[i] <= partieDroite[j]) {
-                array[k] = partieGauche[i];
+        while (i < nbLeftElements && j < nbRightElements) {
+            if (leftPart[i] <= rightPart[j]) {
+                array[k] = rightPart[i];
                 i++;
             } else {
-                array[k] = partieDroite[j];
+                array[k] = rightPart[j];
                 j++;
             }
             k++;
         }
-        while (i < nbElementsGauche) {
-            array[k] = partieGauche[i];
+        while (i < nbLeftElements) {
+            array[k] = leftPart[i];
             i++;
             k++;
         }
-        while (j < nbElementsDroite) {
-            array[k] = partieDroite[j];
+        while (j < nbRightElements) {
+            array[k] = rightPart[j];
             j++;
             k++;
         }
@@ -49,6 +52,8 @@ public class MergeSort extends SortTemplate {
 
     @Override
     public int findSplitPoint(int[] array, int start, int fin) {
+        int[] splitPointArray = { array[start + (fin - start) / 2] };
+        sleepThread(sleepTime, splitPointArray);
         return start + (fin - start) / 2;
     }
 

@@ -1,6 +1,7 @@
 package labo4.tn;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -41,15 +42,15 @@ import java.util.Arrays;
 public class App extends Application {
 
     private static Scene scene;
-    private static Button paramButton;
+    private static Button paramButton, startButton, pauseButton;
     private static GridPane grid;
     private double scHeight;
     private double scWidth;
     private SortTemplate sortType;
     private HBox barChart;
     private int[] valuesForAlgorithm;
-    private int[] valuesInProgress;
     private String numbersInputValue, algorithmChoice, speedChoice;
+    private Thread algorithmThread;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -110,14 +111,23 @@ public class App extends Application {
         grid.add(barChart, 0, 1);
         barChart.prefHeightProperty().bind(grid.heightProperty().multiply(0.75));
         barChart.prefWidthProperty().bind(grid.widthProperty());
-        Button pauseButton = new Button("Arret");
+        pauseButton = new Button("Arret");
         pauseButton.prefWidthProperty().bind(grid.widthProperty().divide(5));
-        Button startButton = new Button("Demarrer");
+        pauseButton.setDisable(true);
+        startButton = new Button("Demarrer");
         startButton.prefWidthProperty().bind(grid.widthProperty().divide(5));
         startButton.setOnAction(e -> {
-            if (valuesForAlgorithm != null && sortType != null) {
-                sortType.sort(valuesForAlgorithm, 0, valuesForAlgorithm.length - 1);
-                setBarChart(barChart, valuesForAlgorithm);
+            if (algorithmThread != null) {
+                sortType.resumeAlgorithm();
+                startButton.setDisable(true);
+                pauseButton.setDisable(false);
+            }
+        });
+        pauseButton.setOnAction(e -> {
+            if (sortType != null) {
+                sortType.pauseAlgorithm();
+                startButton.setDisable(false);
+                pauseButton.setDisable(true);
             }
         });
         GridPane.setHalignment(paramButton, HPos.LEFT);
@@ -142,12 +152,11 @@ public class App extends Application {
         Text barText;
         barChart.setAlignment(Pos.BOTTOM_CENTER);
         GridPane.setColumnSpan(barChart, 3);
-        System.out.println(barChart.getWidth());
         for (int num : values) {
             fullBar = new VBox();
             bar = new Rectangle((scWidth / 5) / values.length, num, Color.GREY);
             bar.heightProperty().bind(Bindings.createDoubleBinding(
-                    () -> Math.min(num * 2, scHeight * 0.4),
+                    () -> Math.min((num * 2) + 20, scHeight * 0.4),
                     fullBar.heightProperty()));
             bar.setStroke(Color.BLACK);
             bar.setStrokeWidth(1);
@@ -162,6 +171,8 @@ public class App extends Application {
     }
 
     private void openSettings(Button settingsButton) {
+        startButton.setDisable(true);
+        pauseButton.setDisable(true);
         Stage settingsStage = new Stage();
         GridPane settingsGrid = new GridPane();
         settingsGrid.setAlignment(Pos.CENTER);
@@ -188,20 +199,38 @@ public class App extends Application {
         sortSpeed.setValue("Standard");
         explanationText.setFont(Font.font(explanationText.getFont().getFamily(), FontWeight.BOLD, 16));
         explanationText.setUnderline(true);
+
+        // settings buttons setup
         HBox settingsWindowButtons = new HBox(5);
         Button settingsOkButton = new Button("OK");
         Button settingsApplyButton = new Button("Appliquer");
         Button settingsCancelButton = new Button("Annuler");
         settingsOkButton.prefWidthProperty().bind(settingsWindowButtons.widthProperty().divide(5));
-        // settings ok button setup
         settingsOkButton.setOnAction(e -> {
             settingsApplyButton.fire();
+            // setup thread and sort type
+            if (valuesForAlgorithm != null && sortType != null && algorithmThread == null) {
+                algorithmThread = new Thread(() -> {
+                    sortType.setupAlgorithm(valuesForAlgorithm, 0, valuesForAlgorithm.length - 1);
+                    sortType.setSleepTime(1500);
+                    sortType.run();
+                    Platform.runLater(() -> {
+                        startButton.setDisable(true);
+                        pauseButton.setDisable(true);
+                        paramButton.fire();
+                        setBarChart(barChart, valuesForAlgorithm);
+                        algorithmThread = null;
+                    });
+                });
+                algorithmThread.start();
+            }
+            sortType.pauseAlgorithm();
             settingsStage.close();
             paramButton.setDisable(false);
+            startButton.setDisable(false);
         });
         settingsCancelButton.prefWidthProperty().bind(settingsWindowButtons.widthProperty().divide(5));
         settingsApplyButton.prefWidthProperty().bind(settingsWindowButtons.widthProperty().divide(5));
-        // apply button setup
         settingsApplyButton.setOnAction(e -> {
             settingsCheck(algorithmChoiceList, sortSpeed, numbersToSort);
         });
@@ -218,7 +247,6 @@ public class App extends Application {
         settingsGrid.add(sortSpeed, 1, 4);
         settingsGrid.add(settingsWindowButtons, 0, 5);
         GridPane.setColumnSpan(settingsWindowButtons, 2);
-        // GridPane.setMargin(explanationText, new Insets(scHeight * 0.02, 0, 0, 0));
         settingsGrid.setVgap(10);
         settingsGrid.setHgap(10);
         settingsGrid.setPadding(new Insets(10));
@@ -227,14 +255,16 @@ public class App extends Application {
         settingsStage.setX(buttonBounds.getMinX() - 12);
         settingsStage.setY(buttonBounds.getMinY());
         settingsStage.setResizable(false);
-        settingsStage.setOnCloseRequest(e -> paramButton.setDisable(false));
+        settingsStage.setOnCloseRequest(e -> {
+            paramButton.setDisable(false);
+        });
         settingsStage.show();
     }
 
     private void assignAlgorithm(String choice) {
         switch (choice) {
             case "Merge sort":
-                sortType = new MergeSort();
+                sortType = new MergeSort(this);
                 break;
             case "Quick sort":
                 sortType = new QuickSort(this);
@@ -245,7 +275,6 @@ public class App extends Application {
     public void highlightItems(int[] itemsToHighlight) {
         for (int i = 0; i < itemsToHighlight.length; i++) {
             Rectangle neededBar = (Rectangle) barChart.lookup("#" + itemsToHighlight[i]);
-            System.out.println(neededBar);
             if (neededBar != null) {
                 neededBar.setFill(Color.PURPLE);
             }
@@ -255,8 +284,6 @@ public class App extends Application {
 
     private void settingsCheck(ComboBox<String> algorithmChoiceList, ComboBox<String> sortSpeed,
             TextField numbersToSort) {
-        String selectedAlgorithm = algorithmChoiceList.getValue();
-        System.out.println(selectedAlgorithm);
 
         if (algorithmChoice == null) {
             algorithmChoice = algorithmChoiceList.getValue();
@@ -269,7 +296,9 @@ public class App extends Application {
             String[] extractedValues = numbersToSort.getText().split(",");
             valuesForAlgorithm = new int[extractedValues.length];
             for (int i = 0; i < extractedValues.length; i++) {
-                valuesForAlgorithm[i] = Integer.parseInt(extractedValues[i].trim());
+                if (extractedValues[i] != "") {
+                    valuesForAlgorithm[i] = Integer.parseInt(extractedValues[i].trim());
+                }
             }
             if (numbersInputValue == null) {
                 numbersInputValue = numbersToSort.getText();
@@ -280,13 +309,18 @@ public class App extends Application {
             numbersInputValue = numbersToSort.getText();
             setBarChart(barChart, valuesForAlgorithm);
         }
-        if (!(algorithmChoice.equals(selectedAlgorithm))) {
+        if (!(algorithmChoice.equals(algorithmChoiceList.getValue()))) {
             algorithmChoice = algorithmChoiceList.getValue();
             assignAlgorithm(algorithmChoice);
             if (numbersInputValue != null) {
                 setBarChart(barChart, valuesForAlgorithm);
             }
         }
+    }
+
+    public void updateContent(int[] valuesBeingSorted) {
+        setBarChart(barChart, valuesForAlgorithm);
+        highlightItems(valuesBeingSorted);
     }
 
     private static Parent loadFXML(String fxml) throws IOException {
