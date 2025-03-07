@@ -11,15 +11,21 @@ public class MergeSort extends SortTemplate {
         int nbLeftElements = mid - start + 1;
         int nbRightElements = fin - mid;
         int[] leftPart = new int[nbLeftElements];
+        sleepThread(sleepTime, leftPart);
         int[] rightPart = new int[nbRightElements];
         System.arraycopy(array, start, leftPart, 0, nbLeftElements);
         System.arraycopy(array, mid + 1, rightPart, 0, nbRightElements);
+        int[] mergeElements = new int[nbLeftElements + nbRightElements];
+        System.arraycopy(leftPart, 0, mergeElements, 0, nbLeftElements);
+        System.arraycopy(rightPart, 0, mergeElements, nbLeftElements, nbRightElements);
+        sleepThread(sleepTime, mergeElements);
+        System.out.println(Arrays.toString(mergeElements));
         int i = 0;
         int j = 0;
         int k = start;
         while (i < nbLeftElements && j < nbRightElements) {
             if (leftPart[i] <= rightPart[j]) {
-                array[k] = rightPart[i];
+                array[k] = leftPart[i];
                 i++;
             } else {
                 array[k] = rightPart[j];

@@ -73,6 +73,12 @@ public class App extends Application {
         grid.prefHeightProperty().bind(scene.heightProperty());
         grid.prefWidthProperty().bind(scene.widthProperty());
         loadContent(grid);
+        stage.setOnCloseRequest(e -> {
+            if (algorithmThread != null) {
+                sortType.stopAlgorithm();
+                algorithmThread = null;
+            }
+        });
         // grid.getChildren().forEach(node -> node.setStyle("-fx-border-color: blue"));
         stage.setScene(scene);
         stage.setResizable(false);
@@ -196,7 +202,7 @@ public class App extends Application {
         Text sortSpeedText = new Text("Vitesse de la simulation : ");
         ComboBox<String> sortSpeed = new ComboBox<>();
         sortSpeed.getItems().addAll("Rapide", "Lente", "Standard");
-        sortSpeed.setValue("Standard");
+        sortSpeed.setValue(speedChoice == null ? "Standard" : speedChoice);
         explanationText.setFont(Font.font(explanationText.getFont().getFamily(), FontWeight.BOLD, 16));
         explanationText.setUnderline(true);
 
@@ -212,7 +218,7 @@ public class App extends Application {
             if (valuesForAlgorithm != null && sortType != null && algorithmThread == null) {
                 algorithmThread = new Thread(() -> {
                     sortType.setupAlgorithm(valuesForAlgorithm, 0, valuesForAlgorithm.length - 1);
-                    sortType.setSleepTime(1500);
+                    sortType.pauseAlgorithm();
                     sortType.run();
                     Platform.runLater(() -> {
                         startButton.setDisable(true);
@@ -224,10 +230,15 @@ public class App extends Application {
                 });
                 algorithmThread.start();
             }
-            sortType.pauseAlgorithm();
+            setSpeed(speedChoice);
             settingsStage.close();
             paramButton.setDisable(false);
             startButton.setDisable(false);
+        });
+        settingsCancelButton.setOnAction(e -> {
+            algorithmChoiceList.setValue(algorithmChoice);
+            numbersToSort.setText(numbersInputValue);
+            sortSpeed.setValue(speedChoice);
         });
         settingsCancelButton.prefWidthProperty().bind(settingsWindowButtons.widthProperty().divide(5));
         settingsApplyButton.prefWidthProperty().bind(settingsWindowButtons.widthProperty().divide(5));
@@ -272,6 +283,20 @@ public class App extends Application {
         }
     }
 
+    private void setSpeed(String choice) {
+        switch (choice) {
+            case "Rapide":
+                sortType.setSleepTime(500);
+                break;
+            case "Standard":
+                sortType.setSleepTime(1000);
+                break;
+            case "Lente":
+                sortType.setSleepTime(1500);
+                break;
+        }
+    }
+
     public void highlightItems(int[] itemsToHighlight) {
         for (int i = 0; i < itemsToHighlight.length; i++) {
             Rectangle neededBar = (Rectangle) barChart.lookup("#" + itemsToHighlight[i]);
@@ -284,15 +309,12 @@ public class App extends Application {
 
     private void settingsCheck(ComboBox<String> algorithmChoiceList, ComboBox<String> sortSpeed,
             TextField numbersToSort) {
-
         if (algorithmChoice == null) {
             algorithmChoice = algorithmChoiceList.getValue();
             assignAlgorithm(algorithmChoice);
         }
-        if (speedChoice == null) {
-            speedChoice = sortSpeed.getValue();
-        }
-        if (!(numbersToSort.getText().equals(""))) {
+        speedChoice = sortSpeed.getValue();
+        if (!(numbersToSort.getText().equals("")) && !(sortType.isPaused())) {
             String[] extractedValues = numbersToSort.getText().split(",");
             valuesForAlgorithm = new int[extractedValues.length];
             for (int i = 0; i < extractedValues.length; i++) {

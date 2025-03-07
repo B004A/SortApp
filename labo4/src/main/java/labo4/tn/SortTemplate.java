@@ -8,7 +8,7 @@ public abstract class SortTemplate implements Runnable {
     protected int[] arrayToSort;
     protected App sortApp;
     protected volatile boolean running = true;
-    protected volatile boolean pause = true;
+    protected volatile boolean pause = false;
     protected boolean isSorted = false;
     protected int sleepTime;
 
@@ -79,6 +79,10 @@ public abstract class SortTemplate implements Runnable {
                 }
             }
         }
+    }
+
+    public boolean isPaused() {
+        return this.pause;
     }
 
     @Override
