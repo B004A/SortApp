@@ -91,7 +91,7 @@ public class App extends Application {
     }
 
     private void loadContent(GridPane grid) {
-        Image settingsImg = new Image(getClass().getResourceAsStream("/gear.png"));
+        Image settingsImg = new Image(getClass().getResourceAsStream("/settingsIcon.png"));
         ImageView settingsIcon = new ImageView(settingsImg);
         settingsIcon.setFitHeight(15);
         settingsIcon.setFitWidth(15);
@@ -117,10 +117,18 @@ public class App extends Application {
         grid.add(barChart, 0, 1);
         barChart.prefHeightProperty().bind(grid.heightProperty().multiply(0.75));
         barChart.prefWidthProperty().bind(grid.widthProperty());
-        pauseButton = new Button("Arret");
+        Image pauseImage = new Image(getClass().getResourceAsStream("/pauseIcon.png"));
+        ImageView pauseIcon = new ImageView(pauseImage);
+        pauseIcon.setFitHeight(15);
+        pauseIcon.setFitWidth(15);
+        pauseButton = new Button("Arrêt", pauseIcon);
         pauseButton.prefWidthProperty().bind(grid.widthProperty().divide(5));
         pauseButton.setDisable(true);
-        startButton = new Button("Demarrer");
+        Image startImg = new Image(getClass().getResourceAsStream("/playIcon.png"));
+        ImageView startIcon = new ImageView(startImg);
+        startIcon.setFitHeight(15);
+        startIcon.setFitWidth(15);
+        startButton = new Button("Démarrer", startIcon);
         startButton.prefWidthProperty().bind(grid.widthProperty().divide(5));
         startButton.setOnAction(e -> {
             if (algorithmThread != null) {
