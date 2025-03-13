@@ -2,7 +2,7 @@ package labo4.tn;
 
 public class MergeSort extends SortTemplate {
     public MergeSort(App sortApp) {
-        this.sortApp = sortApp;
+        super(sortApp);
     }
 
     // merge 2 sub arrays back together

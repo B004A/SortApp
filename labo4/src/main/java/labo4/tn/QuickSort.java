@@ -1,9 +1,9 @@
 package labo4.tn;
 
-public class QuickSort extends SortTemplate implements Runnable {
+public class QuickSort extends SortTemplate {
 
     public QuickSort(App sortApp) {
-        this.sortApp = sortApp;
+        super(sortApp);
     }
 
     private void swapElements(int[] array, int indexI, int indexJ) {

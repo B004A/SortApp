@@ -12,6 +12,10 @@ public abstract class SortTemplate implements Runnable {
     protected boolean isSorted = false;
     protected int sleepTime;
 
+    public SortTemplate(App sortApp) {
+        this.sortApp = sortApp;
+    }
+
     public void sortArray() {
         sort(arrayToSort, startIndex, endIndex);
         stopAlgorithm();
