@@ -1,7 +1,5 @@
 package labo4.tn;
 
-import javafx.application.Platform;
-
 public class QuickSort extends SortTemplate implements Runnable {
 
     public QuickSort(App sortApp) {
@@ -9,7 +7,6 @@ public class QuickSort extends SortTemplate implements Runnable {
     }
 
     private void swapElements(int[] array, int indexI, int indexJ) {
-        int[] swapArray = { array[indexI], array[indexJ] };
         int temp = array[indexJ];
         array[indexJ] = array[indexI];
         array[indexI] = temp;
@@ -25,6 +22,7 @@ public class QuickSort extends SortTemplate implements Runnable {
         sort(array, splitPoint + 1, fin);
     }
 
+    // find pivot index and return it
     @Override
     public int findSplitPoint(int[] array, int start, int fin) {
         int pivot = array[fin];
@@ -32,6 +30,7 @@ public class QuickSort extends SortTemplate implements Runnable {
         int[] arrPivot = { array[fin] };
         sleepThread(sleepTime, arrPivot);
         int lowestIndex = start - 1;
+        // highligth elements being sorted
         for (int j = start; j <= fin; j++) {
             if (array[j] < pivot) {
                 lowestIndex++;

@@ -34,7 +34,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * JavaFX App
@@ -79,7 +78,6 @@ public class App extends Application {
                 algorithmThread = null;
             }
         });
-        // grid.getChildren().forEach(node -> node.setStyle("-fx-border-color: blue"));
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
@@ -90,6 +88,7 @@ public class App extends Application {
         scene.setRoot(loadFXML(fxml));
     }
 
+    // load main content
     private void loadContent(GridPane grid) {
         Image settingsImg = new Image(getClass().getResourceAsStream("/settingsIcon.png"));
         ImageView settingsIcon = new ImageView(settingsImg);
@@ -159,6 +158,7 @@ public class App extends Application {
         grid.add(bottomButtons, 2, 2);
     }
 
+    // custom bar chart setup
     private void setBarChart(HBox barChart, int[] values) {
         barChart.getChildren().clear();
         Rectangle bar;
@@ -184,6 +184,7 @@ public class App extends Application {
         }
     }
 
+    // settings window setup
     private void openSettings(Button settingsButton) {
         startButton.setDisable(true);
         pauseButton.setDisable(true);
@@ -280,6 +281,7 @@ public class App extends Application {
         settingsStage.show();
     }
 
+    // assign chosen algorithm to sort
     private void assignAlgorithm(String choice) {
         switch (choice) {
             case "Merge sort":
@@ -291,6 +293,7 @@ public class App extends Application {
         }
     }
 
+    // set speed of algorithm
     private void setSpeed(String choice) {
         switch (choice) {
             case "Rapide":
@@ -305,6 +308,7 @@ public class App extends Application {
         }
     }
 
+    // update content on screen to highlight items that's being sorted
     public void highlightItems(int[] itemsToHighlight) {
         for (int i = 0; i < itemsToHighlight.length; i++) {
             Rectangle neededBar = (Rectangle) barChart.lookup("#" + itemsToHighlight[i]);
@@ -315,6 +319,8 @@ public class App extends Application {
         }
     }
 
+    // check if anything in user input was changed or if any data was received on
+    // first input
     private void settingsCheck(ComboBox<String> algorithmChoiceList, ComboBox<String> sortSpeed,
             TextField numbersToSort) {
         if (algorithmChoice == null) {

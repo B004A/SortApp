@@ -1,12 +1,11 @@
 package labo4.tn;
 
-import java.util.Arrays;
-
 public class MergeSort extends SortTemplate {
     public MergeSort(App sortApp) {
         this.sortApp = sortApp;
     }
 
+    // merge 2 sub arrays back together
     private void merge(int[] array, int start, int mid, int fin) {
         int nbLeftElements = mid - start + 1;
         int nbRightElements = fin - mid;
@@ -19,7 +18,6 @@ public class MergeSort extends SortTemplate {
         System.arraycopy(leftPart, 0, mergeElements, 0, nbLeftElements);
         System.arraycopy(rightPart, 0, mergeElements, nbLeftElements, nbRightElements);
         sleepThread(sleepTime, mergeElements);
-        System.out.println(Arrays.toString(mergeElements));
         int i = 0;
         int j = 0;
         int k = start;
