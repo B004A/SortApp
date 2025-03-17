@@ -101,6 +101,7 @@ public abstract class SortTemplate implements Runnable {
                         wait();
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
+                        break;
                     }
                 }
             }

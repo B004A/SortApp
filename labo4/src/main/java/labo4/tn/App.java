@@ -50,6 +50,7 @@ public class App extends Application {
     private int[] valuesForAlgorithm;
     private String numbersInputValue, algorithmChoice, speedChoice;
     private Thread algorithmThread;
+    private int setupStatus;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -74,7 +75,8 @@ public class App extends Application {
         loadContent(grid);
         stage.setOnCloseRequest(e -> {
             if (algorithmThread != null) {
-                sortType.stopAlgorithm();
+                setupStatus = 0;
+                algorithmThread.interrupt();
                 algorithmThread = null;
             }
         });
@@ -222,7 +224,7 @@ public class App extends Application {
         Button settingsCancelButton = new Button("Annuler");
         settingsOkButton.prefWidthProperty().bind(settingsWindowButtons.widthProperty().divide(5));
         settingsOkButton.setOnAction(e -> {
-            settingsApplyButton.fire();
+            settingsCheck(algorithmChoiceList, sortSpeed, numbersToSort);
             // setup thread and sort type
             if (valuesForAlgorithm != null && sortType != null && algorithmThread == null) {
                 algorithmThread = new Thread(() -> {
@@ -230,11 +232,7 @@ public class App extends Application {
                     sortType.pauseAlgorithm();
                     sortType.run();
                     Platform.runLater(() -> {
-                        startButton.setDisable(true);
-                        pauseButton.setDisable(true);
-                        paramButton.fire();
-                        setBarChart(barChart, valuesForAlgorithm);
-                        algorithmThread = null;
+                        checkStatus();
                     });
                 });
                 algorithmThread.start();
@@ -323,9 +321,17 @@ public class App extends Application {
     // first input
     private void settingsCheck(ComboBox<String> algorithmChoiceList, ComboBox<String> sortSpeed,
             TextField numbersToSort) {
+        setupStatus = 1;
         if (algorithmChoice == null) {
             algorithmChoice = algorithmChoiceList.getValue();
             assignAlgorithm(algorithmChoice);
+        }
+        if (numbersInputValue != null && !(numbersInputValue.equals(numbersToSort.getText()))) {
+            setupStatus = 0;
+            algorithmThread.interrupt();
+            algorithmThread = null;
+            numbersInputValue = numbersToSort.getText();
+            setBarChart(barChart, valuesForAlgorithm);
         }
         speedChoice = sortSpeed.getValue();
         if (!(numbersToSort.getText().equals("")) && !(sortType.isPaused())) {
@@ -341,13 +347,13 @@ public class App extends Application {
                 setBarChart(barChart, valuesForAlgorithm);
             }
         }
-        if (numbersInputValue != null && !(numbersInputValue.equals(numbersToSort.getText()))) {
-            numbersInputValue = numbersToSort.getText();
-            setBarChart(barChart, valuesForAlgorithm);
-        }
         if (!(algorithmChoice.equals(algorithmChoiceList.getValue()))) {
-            algorithmChoice = algorithmChoiceList.getValue();
-            assignAlgorithm(algorithmChoice);
+            if (algorithmThread != null) {
+                setupStatus = 0;
+                algorithmThread.interrupt();
+                algorithmChoice = algorithmChoiceList.getValue();
+                assignAlgorithm(algorithmChoice);
+            }
             if (numbersInputValue != null) {
                 setBarChart(barChart, valuesForAlgorithm);
             }
@@ -362,6 +368,16 @@ public class App extends Application {
     private static Parent loadFXML(String fxml) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
         return fxmlLoader.load();
+    }
+
+    private void checkStatus() {
+        if (setupStatus == 1) {
+            startButton.setDisable(true);
+            pauseButton.setDisable(true);
+            paramButton.fire();
+            setBarChart(barChart, valuesForAlgorithm);
+            algorithmThread = null;
+        }
     }
 
     public static void main(String[] args) {
