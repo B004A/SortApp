@@ -209,9 +209,6 @@ public class App extends Application {
         Text collectionToSortText = new Text("Numbers to sort : ");
         TextField numbersToSort = new TextField();
         numbersToSort.setPromptText("ex.: 1,5,3,7,9...63");
-        // debug
-        numbersToSort.setText(
-                "100,5,98,7,9,63,2,74,6,8,10,50,14,16,18,20,22,30,32,34,12,52,54,56,72,4,76,78,3,1");
         if (numbersInputValue != null) {
             numbersToSort.setText(numbersInputValue);
         }
@@ -280,12 +277,10 @@ public class App extends Application {
         settingsStage.setResizable(false);
         settingsStage.setOnCloseRequest(e -> {
             paramButton.setDisable(false);
-            System.out.println("Settings closed on close request");
         });
         settingsStage.initModality(Modality.APPLICATION_MODAL);
         settingsStage.initOwner(scene.getWindow());
         settingsStage.show();
-        System.out.println("Settings closed after showAndWait");
     }
 
     // assign chosen algorithm to sort
@@ -345,7 +340,6 @@ public class App extends Application {
         speedChoice = sortSpeed.getValue();
         if (!(numbersToSort.getText().equals(""))) {
             String[] extractedValues = numbersToSort.getText().split(",");
-            System.out.println("Extracted Values:" + Arrays.toString(extractedValues));
             valuesForAlgorithm = new int[extractedValues.length];
             for (int i = 0; i < extractedValues.length; i++) {
                 if (extractedValues[i] != "") {
@@ -389,7 +383,6 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
-        System.out.println("Application is running");
         launch();
     }
 
