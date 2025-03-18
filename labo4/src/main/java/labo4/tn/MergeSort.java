@@ -7,6 +7,9 @@ public class MergeSort extends SortTemplate {
 
     // merge 2 sub arrays back together
     private void merge(int[] array, int start, int mid, int fin) {
+        if (!running || Thread.currentThread().isInterrupted()) {
+            return; // Exit immediately if the thread is interrupted or stopped
+        }
         int nbLeftElements = mid - start + 1;
         int nbRightElements = fin - mid;
         int[] leftPart = new int[nbLeftElements];
@@ -45,6 +48,9 @@ public class MergeSort extends SortTemplate {
 
     @Override
     public void sort(int[] array, int start, int fin) {
+        if (!running || Thread.currentThread().isInterrupted()) {
+            return; // Exit immediately if the thread is interrupted or stopped
+        }
         if (start >= fin) {
             return;
         }
@@ -56,6 +62,9 @@ public class MergeSort extends SortTemplate {
 
     @Override
     public int findSplitPoint(int[] array, int start, int fin) {
+        if (!running || Thread.currentThread().isInterrupted()) {
+            return fin; // Exit immediately if the thread is interrupted or stopped
+        }
         int[] splitPointArray = { array[start + (fin - start) / 2] };
         sleepThread(sleepTime, splitPointArray);
         return start + (fin - start) / 2;

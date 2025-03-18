@@ -7,6 +7,9 @@ public class QuickSort extends SortTemplate {
     }
 
     private void swapElements(int[] array, int indexI, int indexJ) {
+        if (!running || Thread.currentThread().isInterrupted()) {
+            return; // Exit immediately if the thread is interrupted or stopped
+        }
         int temp = array[indexJ];
         array[indexJ] = array[indexI];
         array[indexI] = temp;
@@ -14,6 +17,9 @@ public class QuickSort extends SortTemplate {
 
     @Override
     public void sort(int[] array, int start, int fin) {
+        if (!running || Thread.currentThread().isInterrupted()) {
+            return; // Exit immediately if the thread is interrupted or stopped
+        }
         if (start >= fin) {
             return;
         }
@@ -25,6 +31,9 @@ public class QuickSort extends SortTemplate {
     // find pivot index and return it
     @Override
     public int findSplitPoint(int[] array, int start, int fin) {
+        if (!running || Thread.currentThread().isInterrupted()) {
+            return fin; // Exit immediately if the thread is interrupted or stopped
+        }
         int pivot = array[fin];
         int[] elementsToSwap = new int[3];
         int[] arrPivot = { array[fin] };

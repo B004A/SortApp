@@ -95,6 +95,9 @@ public abstract class SortTemplate implements Runnable {
             if (!pause) {
                 sortArray();
             }
+            if (Thread.currentThread().isInterrupted()) {
+                break;
+            }
             if (pause) {
                 synchronized (this) {
                     try {
