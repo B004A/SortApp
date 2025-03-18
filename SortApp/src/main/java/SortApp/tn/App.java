@@ -52,6 +52,7 @@ public class App extends Application {
     private Thread algorithmThread;
     private int setupStatus;
 
+    @SuppressWarnings("exports")
     @Override
     public void start(Stage stage) throws IOException {
         Rectangle2D scBounds = Screen.getPrimary().getVisualBounds();
